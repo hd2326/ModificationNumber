@@ -102,7 +102,17 @@ legend("topright", legend = paste("k=", 7:3, sep = ""), fill = 8:4, bty = "n", b
 plot(NA, NA, xlim = c(0, 6), ylim = c(0, 2), xlab = "log2(mad)", ylab = "p")
 for (i in 1:length(d_k)) lines(density(log2(d_k[[i]]), na.rm = T), col = rainbow(12)[i])
 legend("topright", legend = names(d_k), fill = rainbow(12), bty = "n", border = NA)
-#visualization
+                                                 
+d_k <- lapply(sig_k, function(sig) unlist(lapply(sig, function(s) mad(s$event_level_mean))))
+d <- matrix(1, length(d_k), length(d_k), dimnames = list(names(d_k), names(d_k)))
+for (i in 1:length(d_k)) for (j in 1:length(d_k)) d[i, j] <- ks.test(d_k[[i]], d_k[[j]])$statistic
+image(d, axes = F, main = "NA12878 mRNA")
+axis(side = 1, at = seq(0, 1, length.out = nrow(d)), labels = rownames(d), tick = F, las = 2, cex.axis = 0.5)
+axis(side = 2, at = seq(0, 1, length.out = ncol(d)), labels = colnames(d), tick = F, las = 2, cex.axis = 0.5)
+for (i in 1:nrow(d)) for (j in 1:ncol(d)) text(seq(0, 1, length.out = nrow(d))[i],
+                                               seq(0, 1, length.out = ncol(d))[j], labels = signif(d[i, j], 2), cex = 0.5)
+                                                 
+#determining optimal number of k
 
 pb <- txtProgressBar(min = 0, max = 5*4^4, style = 3)
 sig_p <- structure(lapply(1:5, function(i, table, x, pb){
