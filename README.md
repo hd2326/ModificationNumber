@@ -3,14 +3,14 @@ Scripts in this repository can be used to reproduce all results in manuscript "G
 Scripts were organized in folders based on the datasets they were applied to. For each folder, the .sh script was used for data pre-processing, and the .R script was used for the actual analysis.
 
 In total, including
-1. The Zymo native synthesized oligo nanopore sequencing dataset (./zymo) [1].
-2. Thymidine analogs-containing primer extension dataset (./nmeth/primer_extension) [2]
-3. Native yeast genomic DNA nanopore sequencing datasets (./nmeth/yeast) [2]
-4. NA12878 cell line mRNA dataset [3].
+1. The Zymo native synthesized oligo nanopore sequencing dataset (./zymo/) [1].
+2. Thymidine analogs-containing primer extension dataset (./nmeth/primer_extension/) [2]
+3. Native yeast genomic DNA nanopore sequencing datasets (./nmeth/yeast/) [2]
+4. NA12878 cell line mRNA dataset (./mrna/) [3].
 5. E.coli 16S rRNA nanopore sequencing dataset [4], containing the following 3 sub-datasets. Please note the event tables were provided by the authors of the original study therefore data pre-processing is not applicable here.
-    5a. Native strain.
-    5b. Pseudouridine-deficient (Psi516) strain.
-    5c. m7G-deficient (m7G) strain.
+    5a. Native strain (./rrna/).
+    5b. Pseudouridine-deficient (Psi516) strain (./rrna/).
+    5c. m7G-deficient (m7G) strain (./rrna/).
 
 References:
 1. Rand, A. C., Jain, M., Eizenga, J. M., Musselman-Brown, A., Olsen, H. E., Akeson, M., & Paten, B. (2017). Mapping DNA methylation with high-throughput nanopore sequencing. Nature methods, 14(4), 411.
