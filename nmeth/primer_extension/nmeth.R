@@ -88,17 +88,119 @@ base <- c("T", "EdU", "FdU", "BrdU", "IdU")
 sig <- structure(lapply(base, function(b, table) table$event_level_mean[table$position == 27 & table$contig == b], table=table), names=base)
 sig <- lapply(sig, function(x, median, mad) x[x > median-2*mad & x < median+2*mad], median=median(unlist(sig)), mad=mad(unlist(sig)))
 sig <- sig[which(unlist(lapply(sig, function(x) length(x) > 500)))]
-fit <- structure(lapply(5:9, function(i, sig) emtest.norm(sig, m0 = i), sig=unlist(sig)), names=3:7)
+fit <- structure(lapply(1:9, function(i, sig) emtest.norm(sig, m0 = i), sig=unlist(sig)), names=1:9)
 save(sig, fit, file = "primer_extension_fit_27.rda")
 #position 27, GCCTGA, original paper showcase
 sig <- structure(lapply(base, function(b, table) table$event_level_mean[table$position == 34 & table$contig == b], table=table), names=base)
 sig <- lapply(sig, function(x, median, mad) x[x > median-2*mad & x < median+2*mad], median=median(unlist(sig)), mad=mad(unlist(sig)))
 sig <- sig[which(unlist(lapply(sig, function(x) length(x) > 500)))]
-fit <- structure(lapply(3:7, function(i, sig) emtest.norm(sig, m0 = i), sig=unlist(sig)), names=3:7)
+fit <- structure(lapply(1:9, function(i, sig) emtest.norm(sig, m0 = i), sig=unlist(sig)), names=1:9)
 save(sig, fit, file = "primer_extension_fit_34.rda")
 #position 34, CATCGC
 #mixture model
 
+par(mfrow = c(2, 3), mar = c(5, 8, 3, 4))
+load("primer_extension_fit_27.rda")
+p <- unlist(lapply(fit, function(x) -log10(x$"P-values")))
+plot(names(fit), p, type = "b", xlab = "#Components", ylab = "-log10(p-value)",
+     col = c(1, 1, 1, 1, 1, 1, 2, 1, 1), cex = 2, cex.axis = 2, cex.lab = 2, main = "")
+#determine #components
+barplot(fit$"7"[[1]][1, ], xlab = "Component", ylab = "Propotion", col = c(2, 2, 8, 8, 8, 8, 2),
+        names.arg = 1:7, cex.axis = 2, cex.lab = 2, cex.names = 2,  main = "GCCTGA", cex.main = 4)
+#filter components
+p <- matrix(NA, length(sig), length(sig), dimnames = list(names(sig), names(sig)))
+for (i in 1:length(sig)) for (j in 1:length(sig)) if (i > j) p[i, j] <- wilcox.test(sig[[i]], sig[[j]])$p.value
+image(-log10(p), xaxt = "n", yaxt = "n", col = colorRampPalette(c("Grey", "Red"))(100), main = "")
+axis(side = 1, at = seq(0, 1, length.out = nrow(p)), labels = rownames(p), tick = F, las = 2, cex.axis = 2)
+axis(side = 2, at = seq(0, 1, length.out = ncol(p)), labels = colnames(p), tick = F, las = 2, cex.axis = 2)
+for (i in 1:nrow(p)) for (j in 1:ncol(p)) if (i > j) text(seq(0, 1, length.out = nrow(p))[i], seq(0, 1, length.out = ncol(p))[j], labels = signif(-log10(p[i, j]), 2), cex = 1.5)
+legend("topleft", legend = "-log10(p-value)", bty = "n", border = NA, cex = 2)
+#signal comparison
+
+load("primer_extension_fit_34.rda")
+p <- unlist(lapply(fit, function(x) -log10(x$"P-values")))
+plot(names(fit), p, type = "b", xlab = "#Components", ylab = "-log10(p-value)",
+     col = c(1, 1, 1, 1, 1, 1, 2, 1, 1), cex = 2, cex.axis = 2, cex.lab = 2, main = "")
+#determine #components
+barplot(fit$"7"[[1]][1, ], xlab = "Component", ylab = "Propotion", col = c(2, 2, 8, 8, 8, 8, 2),
+        names.arg = 1:7, cex.axis = 2, cex.lab = 2, cex.names = 2,  main = "CATCGC", cex.main = 4)
+#filter components
+p <- matrix(NA, length(sig), length(sig), dimnames = list(names(sig), names(sig)))
+for (i in 1:length(sig)) for (j in 1:length(sig)) if (i > j) p[i, j] <- wilcox.test(sig[[i]], sig[[j]])$p.value
+image(-log10(p), xaxt = "n", yaxt = "n", col = colorRampPalette(c("Grey", "Red"))(100), main = "")
+axis(side = 1, at = seq(0, 1, length.out = nrow(p)), labels = rownames(p), tick = F, las = 2, cex.axis = 2)
+axis(side = 2, at = seq(0, 1, length.out = ncol(p)), labels = colnames(p), tick = F, las = 2, cex.axis = 2)
+for (i in 1:nrow(p)) for (j in 1:ncol(p)) if (i > j) text(seq(0, 1, length.out = nrow(p))[i], seq(0, 1, length.out = ncol(p))[j], labels = signif(-log10(p[i, j]), 2), cex = 1.5)
+legend("topleft", legend = "-log10(p-value)", bty = "n", border = NA, cex = 2)
+#signal comparison
+#determine optimal number of components                        
+ 
+library(mixtools)
+layout(matrix(c(1, 1, 1, 5, 5, 5,
+                2, 3, 4, 6, 7, 8), nrow = 2, ncol = 6, byrow = T), widths = rep(2, 6), heights = c(6, 2))
+load("primer_extension_fit_27.rda")
+par(mar = c(6, 6, 8, 6))
+plot(density(unlist(sig)), ylim = c(0, 0.25), xlab = "pA", cex.axis = 2, cex.lab = 2, lwd = 3, main = "GCCTGA", cex.main = 5)
+lines(density(unlist(rnormmix(50000, lambda = fit$"7"[[1]][1, ], mu = fit$"7"[[1]][2, ], sigma = sqrt(fit$"7"[[1]][3, ])))), lwd = 3, col = 2)
+lines(density(unlist(rnormmix(50000, lambda = fit$"7"[[1]][1, 3:6], mu = fit$"7"[[1]][2, 3:6], sigma = sqrt(fit$"7"[[1]][3, 3:6])))), lwd = 3, col = 3)
+legend("topright", legend = c("empirical", "fit", "fit refine"), col = 1:3, lty = 1, cex = 2, lwd = 3, bty = "n", border = NA)
+par(new = T)
+plot(NA, NA, axes = F, xlab = "", ylab = "", ylim = c(0, 0.4), xlim = range(unlist(sig)))
+axis(side = 4, cex.axis = 2)
+for (i in 1:length(sig)) lines(density(sig[[i]]), lty = 2, lwd = 3, col = i+3)
+legend("topleft", legend = names(sig), col = 4:8, lty = 2, cex = 2, lwd = 3,  bty = "n", border = NA)
+#signal distribution
+i1 <- order(fit$"7"[[1]][2, 3:6])
+i2 <- order(c(median(sig$T), median(sig$EdU), median(sig$FdU), median(c(sig$BrdU, sig$IdU))))
+par(mar = c(5, 5, 1, 1))
+plot(fit$"7"[[1]][2, 3:6][i1], c(median(sig$T), median(sig$EdU), median(sig$FdU), median(c(sig$BrdU, sig$IdU)))[i2],
+     xlim = c(90, 97), ylim = c(90, 97), pch = 16, xlab = "fitted", ylab = "median", cex.axis = 2, cex.lab = 2)
+text(fit$"7"[[1]][2, 3:6][i1], c(median(sig$T), median(sig$EdU), median(sig$FdU), median(c(sig$BrdU, sig$IdU)))[i2], labels = c("T", "EdU", "FdU", "Br/IdU")[i2], cex = 1.5)
+abline(0, 1, NULL, NULL, col = 2, lty = 4, lwd = 2)
+#mean/median
+plot(sqrt(fit$"7"[[1]][3, 3:6])[i1], c(mad(sig$T), mad(sig$EdU), mad(sig$FdU), mad(c(sig$BrdU, sig$IdU)))[i2],
+     xlim = c(0, 2.5), ylim = c(0, 2.5), pch = 16, xlab = "fitted", ylab = "mad", cex.axis = 1.5, cex.lab = 2)
+text(sqrt(fit$"7"[[1]][3, 3:6])[i1], c(mad(sig$T), mad(sig$EdU), mad(sig$FdU), mad(c(sig$BrdU, sig$IdU)))[i2], labels = c("T", "IdU", "FdU", "Br/EdU")[i2], cex = 1.5)
+abline(0, 1, NULL, NULL, col = 2, lty = 4, lwd = 2)
+#sd/mad
+plot((fit$"7"[[1]][1, 3:6]/sum(fit$"7"[[1]][1, 3:6]))[i1], (c(length(sig$T), length(sig$EdU), length(sig$FdU), length(c(sig$BrdU, sig$IdU)))/length(unlist(sig)))[i2],
+     xlim = c(0.05, 0.5), ylim = c(0.05, 0.5), pch = 16, xlab = "fitted", ylab = "porpotion", cex.axis = 1.5, cex.lab = 2)
+text(fit$"7"[[1]][1, 3:6][i1], (c(length(sig$T), length(sig$EdU), length(sig$FdU), length(c(sig$BrdU, sig$IdU)))/length(unlist(sig)))[i2], labels = c("T", "EdU", "FdU", "Br/IdU")[i2], cex = 1.5)
+abline(0, 1, NULL, NULL, col = 2, lty = 4, lwd = 2)
+#alpha
+
+load("primer_extension_fit_34.rda")
+par(mar = c(6, 6, 8, 6))
+plot(density(unlist(sig)), ylim = c(0, 0.15), xlab = "pA", cex.axis = 2, cex.lab = 2, lwd = 3, main = "CATCGC", cex.main = 5)
+lines(density(unlist(rnormmix(50000, lambda = fit$"7"[[1]][1, ], mu = fit$"7"[[1]][2, ], sigma = sqrt(fit$"7"[[1]][3, ])))), lwd = 3, col = 2)
+lines(density(unlist(rnormmix(50000, lambda = fit$"7"[[1]][1, 3:6], mu = fit$"7"[[1]][2, 3:6], sigma = sqrt(fit$"7"[[1]][3, 3:6])))), lwd = 3, col = 3)
+legend("topright", legend = c("empirical", "fit", "fit refine"), col = 1:3, lty = 1, cex = 2, lwd = 3, bty = "n", border = NA)
+par(new = T)
+plot(NA, NA, axes = F, xlab = "", ylab = "", ylim = c(0, 0.2), xlim = range(unlist(sig)))
+axis(side = 4, cex.axis = 2)
+for (i in 1:length(sig)) lines(density(sig[[i]]), lty = 2, lwd = 3, col = i+3)
+legend("topleft", legend = names(sig), col = 4:8, lty = 2, cex = 2, lwd = 3,  bty = "n", border = NA)
+#signal distribution
+i1 <- order(fit$"7"[[1]][2, 3:6])
+i2 <- order(c(median(sig$T), median(sig$EdU), median(sig$FdU), median(c(sig$BrdU, sig$IdU))))
+par(mar = c(5, 5, 1, 1))
+plot(fit$"7"[[1]][2, 3:6][i1], c(median(sig$T), median(sig$EdU), median(sig$FdU), median(c(sig$BrdU, sig$IdU)))[i2],
+     xlim = c(112, 128), ylim = c(112, 128), pch = 16, xlab = "fitted", ylab = "median", cex.axis = 1.5, cex.lab = 2)
+text(fit$"7"[[1]][2, 3:6][i1], c(median(sig$T), median(sig$EdU), median(sig$FdU), median(c(sig$BrdU, sig$IdU)))[i2], labels = c("T", "EdU", "FdU", "Br/IdU")[i2], cex = 1.5)
+abline(0, 1, NULL, NULL, col = 2, lty = 4, lwd = 2)
+#mean/median
+plot(sqrt(fit$"7"[[1]][3, 3:6])[i1], c(mad(sig$T), mad(sig$EdU), mad(sig$FdU), mad(c(sig$BrdU, sig$IdU)))[i2],
+     xlim = c(0.5, 3.5), ylim = c(0.5, 3.5), pch = 16, xlab = "fitted", ylab = "mad", cex.axis = 1.5, cex.lab = 2)
+text(sqrt(fit$"7"[[1]][3, 3:6])[i1], c(mad(sig$T), mad(sig$EdU), mad(sig$FdU), mad(c(sig$BrdU, sig$IdU)))[i2], labels = c("T", "EdU", "FdU", "Br/IdU")[i2], cex = 1.5)
+abline(0, 1, NULL, NULL, col = 2, lty = 4, lwd = 2)
+#sd/mad
+plot((fit$"7"[[1]][1, 3:6]/sum(fit$"7"[[1]][1, 3:6]))[i1], (c(length(sig$T), length(sig$EdU), length(sig$FdU), length(c(sig$BrdU, sig$IdU)))/length(unlist(sig)))[i2],
+     xlim = c(0.1, 0.4), ylim = c(0.1, 0.4), pch = 16, xlab = "fitted", ylab = "propotion", cex.axis = 1.5, cex.lab = 2)
+text(fit$"7"[[1]][1, 3:6][i1], (c(length(sig$T), length(sig$EdU), length(sig$FdU), length(c(sig$BrdU, sig$IdU)))/length(unlist(sig)))[i2], labels = c("T", "EdU", "FdU", "Br/IdU")[i2], cex = 1.5)
+abline(0, 1, NULL, NULL, col = 2, lty = 4, lwd = 2)
+#alpha
+#visualize fitting results  
+  
 load("primer_extension_table.rda")
 read <- unlist(lapply(table, function(x) sum(25:36 %in% x$position) == 12))
 contig <- unlist(lapply(table[read], function(x) x$contig[1]))
@@ -108,3 +210,30 @@ sig_31_36 <- lapply(table[read], function(x) structure(unlist(lapply(31:36, func
 sig_31_36 <- do.call(rbind, sig_31_36)
 sig_25_36 <- cbind(sig_25_30, sig_31_36)
 #clustering reads
+                                                                     
+library(dendextend)
+library(cluster)
+layout(matrix(c(1, 2, 3, 3), 2, 2, byrow = F), heights = c(4, 1))
+pam <- pam(dist(sig_25_36), k = 2)$clustering
+hclust <- hclust(dist(sig_25_36[pam == 1, ]), method = "ward.D")
+cluster <- cutree(hclust, 5)
+prop <- lapply(1:5, function(i, cluster, contig) table(contig[cluster == i]), contig=contig[pam == 1], cluster=cluster)
+prop <- apply(do.call(cbind, prop), 2, prop.table)[, c(4, 1, 2, 3, 5)]
+colnames(prop) <- paste("Cluster", 1:5, sep = "")
+dend <- as.dendrogram(hclust)
+labels(dend) <- ""
+dend <- color_branches(dend, k = 5, col = rainbow(5))
+par(mar = c(1, 1.5, 4, 1.5))
+plot(dend, axes = F, main = "Pos 25-36", cex.main = 2)
+legend("topleft", legend = c("BrdU", "EdU", "FdU", "IdU", "T"), fill = 1:5, cex = 1.5, bty = "n", border = NA)
+legend("topright", legend = paste("Cluster", 1:5, sep = ""), fill = rainbow(5), cex = 1.5, bty = "n", border = NA)
+par(mar = c(1, 1, 0, 1))
+barplot(rep(1, sum(pam == 1)), space = 0, border = NA, col = as.factor(contig)[pam == 1][hclust$order], axes = F)
+par(mar = c(6, 2, 4, 8))
+image(prop, axes = F, main = "")
+axis(side = 1, at = seq(0, 1, length.out = nrow(prop)), labels = rownames(prop), tick = F, las = 2, cex.axis = 1.5)
+axis(side = 4, at = seq(0, 1, length.out = ncol(prop)), labels = colnames(prop), tick = F, las = 2, cex.axis = 1.5)
+for (i in 1:nrow(prop)) for (j in 1:ncol(prop)) text(seq(0, 1, length.out = nrow(prop))[i],
+                                                     seq(0, 1, length.out = ncol(prop))[j], labels = signif(prop[i, j], 2), cex = 1.5)
+dev.off()
+#clustering visualization
