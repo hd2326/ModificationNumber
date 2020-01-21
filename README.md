@@ -2,7 +2,7 @@ Scripts in this repository can be used to reproduce all results in manuscript "G
 
 Scripts were organized in folders based on the datasets they were applied to. For each folder, the .sh script was used for data pre-processing, and the .R script was used for the actual analysis.
 
-In total, including
+In total 5 datasets were analyzed, including
 1. The Zymo native synthesized oligo nanopore sequencing dataset (./zymo/) [1].
 2. Thymidine analogs-containing primer extension dataset (./nmeth/primer_extension/) [2]
 3. Native yeast genomic DNA nanopore sequencing datasets (./nmeth/yeast/) [2]
