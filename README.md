@@ -8,9 +8,13 @@ In total 5 datasets were analyzed, including
 3. Native yeast genomic DNA nanopore sequencing datasets (./nmeth/yeast/) [2]
 4. NA12878 cell line mRNA dataset (./mrna/) [3].
 5. E.coli 16S rRNA nanopore sequencing dataset [4], containing the following 3 sub-datasets. Please note the event tables were provided by the authors of the original study, therefore data pre-processing is not applicable here.
-    a. Native strain (./rrna/native_ecoli_16s_rRNA/).
-    b. Pseudouridine-deficient (Psi516) strain (./rrna/Psi516_deficient_ecoli_16s_rRNA/).
-    c. m7G-deficient (m7G) strain (./rrna/m7G_deficient_ecoli_16s_rRNA/).
+
+    5a. Native strain (./rrna/native_ecoli_16s_rRNA/).
+    
+    5b. Pseudouridine-deficient (Psi516) strain (./rrna/Psi516_deficient_ecoli_16s_rRNA/).
+    
+    5c. m7G-deficient (m7G) strain (./rrna/m7G_deficient_ecoli_16s_rRNA/).
+    
 
 References:
 1. Rand, A. C., Jain, M., Eizenga, J. M., Musselman-Brown, A., Olsen, H. E., Akeson, M., & Paten, B. (2017). Mapping DNA methylation with high-throughput nanopore sequencing. Nature methods, 14(4), 411.
