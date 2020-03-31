@@ -1,6 +1,8 @@
 Scripts in this repository can be used to reproduce all results in manuscript "Gaussian Mixture Model-Based Unsupervised Nucleotide Modification Number Detection Using Nanopore Sequencing Readouts".
 
-Scripts were organized in folders based on the datasets they were applied to. For each folder, the .sh script was used for data pre-processing, and the .R script was used for the actual analysis.
+The script preprocessing.sh was used for data pre-processing.
+
+Scripts for analysis were organized in folders based on the datasets they were applied to. For each folder, the .R script was used for the actual analysis.
 
 In total 5 datasets were analyzed, including
 1. The Zymo native synthesized oligo nanopore sequencing dataset (./zymo/) [1].
